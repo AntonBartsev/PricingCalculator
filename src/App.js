@@ -1,49 +1,71 @@
-import { useEffect, useState } from 'react';
+import {  useState } from 'react';
 import './App.css';
+import * as utils from './Utils/utils'
 import Question from './Components/Question';
+import AppButton from './Components/AppButton';
+
+  const stockProjectInfo = {
+    areaType: "",
+    wholeAreaSize: 0,
+    areaSizeToProtect: 0,
+    serviceType: "",
+    equipmentSet: []
+  }
 
 function App() {
   const [visibleQuestions, setVisibleQuestions] = useState([0])
-
-  const firstQuestionDescrptn = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque nisl eros, 
-    pulvinar facilisis justo mollis, auctor consequat urna. Morbi a bibendum metus. 
-    Donec scelerisque sollicitudin enim eu venenatis. Duis tincidunt laoreet ex, 
-    in pretium orci vestibulum eget. Class aptent taciti sociosqu ad litora torquent
-    per conubia nostra, per inceptos himenaeos.`
+  const [projectInfo, setProjectInfo] = useState(stockProjectInfo)
+  const [currentQuestion, setCurrentQuestion] = useState(0)
 
   const updateVisibleQuestions = (newVisibleQuestion) => {
-    if (visibleQuestions.findIndex(questionNum => newVisibleQuestion === questionNum) !== -1) { return }
     const updatedVisibleQuestions = [...visibleQuestions]
-    updatedVisibleQuestions.push(newVisibleQuestion)
+    if (visibleQuestions.findIndex(questionNum => newVisibleQuestion === questionNum) !== -1) {
+      updatedVisibleQuestions.splice(updatedVisibleQuestions.length - 1, 1)
+      
+    } else {
+      updatedVisibleQuestions.push(newVisibleQuestion)
+    }
     setVisibleQuestions(updatedVisibleQuestions)
+    setCurrentQuestion(newVisibleQuestion)
   }
 
   const renderSecondQ = () => {
-    if (visibleQuestions.findIndex(q => q === 1) !== -1){
-      return  <Question 
+    if (visibleQuestions.findIndex(q => q === 1) === -1) { return }
+   return  <Question 
       setNextQuestionVisible={updateVisibleQuestions}
       questionNum={1}
-      questionHeading={"Property Type"}
-      questionDescrptn={firstQuestionDescrptn}
-      questionOptions={["Country Side", "Flat", "Industrial"]}
+      questionHeading={"Service Type"}
+      questionDescrptn={utils.secondQuestionDescrptn}
+      questionOptions={["Standard", "Custom"]}
       questionInputs={[]}
       buttonInnerText={"NEXT"}
+      setProjectInfo={setProjectInfo}
+      projectInfo={projectInfo}
+      isQuestionAvailable={visibleQuestions[visibleQuestions.length - 1] === 1}
     />
-    }
-    else {}
   }
  
 
   return (
     <div className="App">
+      <AppButton
+        onClickFunct={updateVisibleQuestions}
+        innerText={"BACK"}
+        currentQuestion={currentQuestion}
+      />
       <Question 
         setNextQuestionVisible={updateVisibleQuestions}
         questionNum={0}
         questionHeading={"Property Type"}
-        questionDescrptn={firstQuestionDescrptn}
+        questionDescrptn={utils.firstQuestionDescrptn}
         questionOptions={["Country Side", "Flat", "Industrial"]}
         questionInputs={["Whole Area (Cubic Meters)", "Area that needs surveillance (Cubic Meters)"]}
+        inputPriority={true}
+        isInputNumeric={true}
         buttonInnerText={"NEXT"}
+        setProjectInfo={setProjectInfo}
+        projectInfo={projectInfo}
+        isQuestionAvailable={visibleQuestions[visibleQuestions.length - 1] === 0}
       />
       {renderSecondQ()}
 

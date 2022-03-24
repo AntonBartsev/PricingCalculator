@@ -18,10 +18,13 @@ export const QuestionHeading = styled.p`
     text-align: center;
     margin-bottom: 5px;
     margin-top: 50px;
+    font-weight: bold;
+    font-size: 20pt;
 `
 
 export const QuestionDescription = styled.p`
     text-align: center;
+    font-size: 14pt;
 `
 
 export const QuestionDescriptionLayout = styled.div`
@@ -30,4 +33,8 @@ export const QuestionDescriptionLayout = styled.div`
     margin-right: auto;
 `
 
+export const QuestionAvailabilityView = styled.div`
+`
+
+//   opacity: ${props => props.isAvailable ? "1" : "0.3"}
 

@@ -13,5 +13,7 @@ export const ChoiceCardLayout = styled.div`
     margin-bottom: 30px;
     cursor: pointer;
     background-color: ${props => props.isOptionChosen ? "black" : "white"};
-    color: ${props => props.isOptionChosen ? "white" : "black"}
+    color: ${props => props.isOptionChosen ? "white" : "black"};
 `
+
+// opacity: ${props => props.isAvailable ? "1" : "0.3"}
