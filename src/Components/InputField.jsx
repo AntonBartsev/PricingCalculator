@@ -1,4 +1,3 @@
-import React from "react";
 import {InputFieldStyled, InputFieldDescription, InputLayout} from "../Styles/InputFieldStyle"
 
 const InputField = (props) => {

@@ -1,22 +1,68 @@
-import {React, useState} from "react";
+import {useState} from "react";
 import { QuestionLayoutOption, QuestionLayoutInput, QuestionHeading, QuestionDescription, QuestionDescriptionLayout, QuestionAvailabilityView } from "../Styles/QuestionsStyle";
 import AppButton from "./AppButton";
 import ChoiceCard from "./ChoiceCard";
 import InputField from "./InputField";
-import {Disable} from "react-disable"
 
 
 const Question = (props) => {
     const [chosenOption, setChosenOption] = useState('')
+    const [multipleChoice, setMultipleChoice] = useState([])
     const [isOptionChosen, setIsOptionChosen] = useState(false)
     const [valuesOfInputFields, setValuesOfInputFields] = useState([])
     const [areInputsFilled, setAreInputsFilled] = useState(false)
+    const [areCustomSpecsChosen, setAreCustomSpecsChosen] = useState(false)
     
     
+    const noInputsInQuestion = () => {
+        return props.questionInputs.length === 0 || !props.questionInputs
+    }
+
+    const isCustomEqQuestion = props.questionNum >= 8 && props.questionNum < 11
 
 
-    const renderOptionStyle = (event, choiceText) => {
-        if (event.target.innerText !== choiceText) { return }
+    const updateCustomChoiceStatus = (opt) => {
+                const updatedProjectInfo = {...props.projectInfo}
+                const indexOfDublicate = updatedProjectInfo.chosenCustomSpecs.findIndex(spec => spec[0] === props.questionHeading)
+                if (indexOfDublicate !== - 1){
+                    updatedProjectInfo.chosenCustomSpecs.splice(indexOfDublicate, 1) 
+                }   
+                updatedProjectInfo.chosenCustomSpecs.push([props.questionHeading, opt])
+                if (updatedProjectInfo.chosenCustomSpecs.length === props.customSpecsNum) {
+                    let chosenSpecs = []
+                    updatedProjectInfo.chosenCustomSpecs.map(spec => chosenSpecs.push(spec))
+                    updatedProjectInfo.finalCustomSpecs.push({eqName: props.eqName, specs: chosenSpecs})
+                    updatedProjectInfo.chosenCustomSpecs.length = 0
+                    setAreCustomSpecsChosen(true)
+                }
+                props.setProjectInfo(updatedProjectInfo)
+    }
+
+
+    const setOptionStyle = (event, choiceText) => {
+        if (event.target.innerText !== choiceText && !props.isMultipleChoice) { return }
+        if (props.isMultipleChoice) {
+            const updatedMultipleChoice = [...multipleChoice]
+            const index = multipleChoice.findIndex(opt => choiceText === opt)
+            if (index !== -1) { 
+                updatedMultipleChoice.splice(index, 1) 
+            } else { 
+                updatedMultipleChoice.push(choiceText) 
+            }
+            if (updatedMultipleChoice.length === 0) {
+                setIsOptionChosen(false)
+                setMultipleChoice(updatedMultipleChoice)
+                updateProjectInfo([], '', updatedMultipleChoice)
+                return
+            }
+            setIsOptionChosen(true)
+            setMultipleChoice(updatedMultipleChoice)
+            updateProjectInfo([], '', updatedMultipleChoice)
+            return
+        }
+        if (props.questionNum >= 8 && props.questionNum < 11) {
+            updateCustomChoiceStatus(choiceText)
+        }
         setChosenOption(choiceText)
         setIsOptionChosen(true)
         updateProjectInfo([], choiceText)
@@ -37,13 +83,15 @@ const Question = (props) => {
     const renderQuestionOptions = () => {
         return props.questionOptions.map((opt, i) =>
             <ChoiceCard
-                key={i} renderOptionStyle={renderOptionStyle}
-                isOptionChosen={opt === chosenOption}
-                choiceText={opt} />)
+                key={i} 
+                setOptionStyle={setOptionStyle}
+                isOptionChosen={props.isMultipleChoice ? multipleChoice.findIndex(option => option === opt) !== -1 : opt === chosenOption}
+                choiceText={opt} />
+        )    
     }
 
     const isNumeric = (str) => {
-        if (typeof str != "string") return false // we only process strings!  
+        if (typeof str !== "string") return false // we only process strings!  
         return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
             !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
     }
@@ -79,7 +127,7 @@ const Question = (props) => {
     }
     
     
-    const updateProjectInfo = (inputs, currentChosenOption) => {
+    const updateProjectInfo = (inputs, currentChosenOption, multipleChoices) => {
         const updatedProjectInfo = { ...props.projectInfo }
         if (props.questionNum === 0) {
             if (currentChosenOption.length > 0 && inputs.length === 2) {
@@ -93,21 +141,28 @@ const Question = (props) => {
                 updatedProjectInfo.areaSizeToProtect = parseFloat(inputs[1])
             }
         } else if (props.questionNum === 1) {
+            if (updatedProjectInfo.serviceType.length > 0){
+                updatedProjectInfo.equipmentSet.length = 0
+            }
             updatedProjectInfo.serviceType = currentChosenOption
-        }
+        } else if (props.questionNum === 2 || props.questionNum === 7) {
+            updatedProjectInfo.equipmentSet = multipleChoices
+            if (props.questionNum === 7){
+                props.updateEquipmentCustomInfo(updatedProjectInfo.equipmentSet)
+            }
+        } 
         props.setProjectInfo(updatedProjectInfo)
         
     }
 
     const checkIfInputsAreFilled = (inputs, isInputCleared) => {
-        if (props.questionInputs.length === 0 || !props.questionInputs) { return setAreInputsFilled(true) }
+        if (noInputsInQuestion()) { return setAreInputsFilled(true) }
         if (isInputCleared) {
             return setAreInputsFilled(false)
         }
         if (inputs.length !== props.questionInputs.length) {
             return setAreInputsFilled(false)
         }
-        
         if (props.inputPriority && inputs.length === props.questionInputs.length) {
             return parseFloat(inputs[0]) >= parseFloat(inputs[1]) ? setAreInputsFilled(true) : setAreInputsFilled(false)
         }
@@ -116,31 +171,37 @@ const Question = (props) => {
     }
     
     return (
-        <Disable disabled={!props.isQuestionAvailable}>
-            <QuestionAvailabilityView>
+        <QuestionAvailabilityView>
                 <QuestionDescriptionLayout>
                     <QuestionHeading>{props.questionHeading}</QuestionHeading>
                     <QuestionDescription>{props.questionDescrptn}</QuestionDescription>
-                </QuestionDescriptionLayout>    
-                <QuestionLayoutOption>
+                </QuestionDescriptionLayout>  
+                <QuestionLayoutOption isAvailable={props.isQuestionAvailable}>
                     {renderQuestionOptions()}
                 </QuestionLayoutOption>
-                <QuestionLayoutInput>
+                <QuestionLayoutInput isAvailable={props.isQuestionAvailable}>
                     {renderQuestionInputs()}
-                    {isOptionChosen && (areInputsFilled || props.questionInputs.length === 0 || !props.questionInputs)
+                    {(isCustomEqQuestion ? (props.questionNum >= 8 && props.questionNum < 11 && props.isButtonVisible) : isOptionChosen && (areInputsFilled || noInputsInQuestion()))
                         ?
                     <AppButton
+                        currentQuestion={props.currentQuestion}
                         onClickFunct={props.setNextQuestionVisible}
                         innerText={props.buttonInnerText}
-                        questionNum={props.questionNum}/>
+                        chosenOption={chosenOption}
+                        projectInfo={props.projectInfo}
+                        areCustomSpecsChosen={areCustomSpecsChosen}
+                        questionNum={props.questionNum}
+                        isButtonVisible={props.isButtonVisible}
+                        />
                         : ""
                     }
-
                 </QuestionLayoutInput>
-            </QuestionAvailabilityView>
-
-        </Disable>
-
+                    <AppButton
+                        currentQuestion={props.currentQuestion}
+                        questionNum={props.questionNum}
+                        onClickFunct={props.setCurrentQuestion}
+                        innerText={"EDIT"}/>
+                </QuestionAvailabilityView>
     )}
 
 export default Question;

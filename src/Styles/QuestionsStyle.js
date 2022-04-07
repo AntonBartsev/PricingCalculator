@@ -3,15 +3,21 @@ import styled from "styled-components";
 export const QuestionLayoutOption = styled.div`
     display: flex;
     justify-content: center;
+    width: 50%;
     flex-direction: row;
-    align-items: start;
+    pointer-events: ${props => props.isAvailable ? '' : 'none'};
+    opacity: ${props => props.isAvailable ? '1' : '0.3'};;
+
 `
 
 export const QuestionLayoutInput = styled.div`
     display: flex;
+    width: 100%;
     justify-content: center;
     flex-direction: column;
     align-items: center;
+    pointer-events: ${props => props.isAvailable ? '' : 'none'};
+    opacity: ${props => props.isAvailable ? '1' : '0.3'};
 `
 
 export const QuestionHeading = styled.p`
@@ -34,7 +40,17 @@ export const QuestionDescriptionLayout = styled.div`
 `
 
 export const QuestionAvailabilityView = styled.div`
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 `
+
+// export const QuestionEditLayout = styled.div`
+//     position: relative;
+
+// `
 
 //   opacity: ${props => props.isAvailable ? "1" : "0.3"}
 

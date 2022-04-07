@@ -1,31 +1,31 @@
-import {React, useState} from "react";
-import { Disable } from "react-disable";
 import { AppButtonStyle } from "../Styles/AppButtonStyle";
 
 const AppButton = (props) => {
-    const [disableForm, setDisableForm] = useState(true)
 
     const setBtnOnClickArg = () => {
-        if (props.innerText === "NEXT") {
-            return props.questionNum + 1
-        } else if (props.innerText === "BACK") {
-            if (props.currentQuestion - 1 === 0) {
-                setDisableForm(true)
-            } else {setDisableForm(false)}
-             return props.currentQuestion - 1
+        if (props.innerText === "NEXT" || props.innerText === "SEE RESULT") {
+            if (props.questionNum === 1 && props.chosenOption === "Custom") {
+                return [props.questionNum + 6]
+            }
+            if (props.questionNum >= 3 && props.questionNum < 6) { 
+                return [props.questionNum + 1, props.chosenOption]
+            } 
+            return [props.questionNum + 1]
+        } else if (props.innerText === "EDIT") {
+             return [props.questionNum]
         }
-            
-     }
+
+    }
     
     
     return (
-        <Disable disabled={props.innerText === "BACK" ? disableForm : false}>
-            <AppButtonStyle
-                onClick={() => props.onClickFunct(setBtnOnClickArg())}>
-                {props.innerText}
-            </AppButtonStyle>
-        </Disable>
-
+        <AppButtonStyle
+        isLargerBtn={props.innerText === "SEE RESULT"}
+        isVisible={props.currentQuestion !== props.questionNum}
+        isEditButton={props.innerText === "EDIT"}
+        onClick={() => props.onClickFunct(setBtnOnClickArg()[0], setBtnOnClickArg()[1])}>
+        {props.innerText}
+    </AppButtonStyle>
 )
 }
 

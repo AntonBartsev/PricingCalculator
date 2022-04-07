@@ -1,10 +1,11 @@
-import React, { useState } from "react";
 import { ChoiceCardLayout } from "../Styles/ChoiceCardStyle";
 
 const ChoiceCard = (props) => {
 
+
+
 return (
-    <ChoiceCardLayout isAvailable={props.isAvailable} onClick={(e) => props.renderOptionStyle(e, props.choiceText)} isOptionChosen={props.isOptionChosen} >  
+    <ChoiceCardLayout onClick={(e) => props.setOptionStyle(e, props.choiceText)} isOptionChosen={props.isOptionChosen} >  
         {props.choiceText}
     </ChoiceCardLayout>
 )
