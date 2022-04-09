@@ -23,18 +23,56 @@ const Question = (props) => {
 
     const updateCustomChoiceStatus = (opt) => {
                 const updatedProjectInfo = {...props.projectInfo}
-                const indexOfDublicate = updatedProjectInfo.chosenCustomSpecs.findIndex(spec => spec[0] === props.questionHeading)
-                if (indexOfDublicate !== - 1){
-                    updatedProjectInfo.chosenCustomSpecs.splice(indexOfDublicate, 1) 
-                }   
-                updatedProjectInfo.chosenCustomSpecs.push([props.questionHeading, opt])
-                if (updatedProjectInfo.chosenCustomSpecs.length === props.customSpecsNum) {
-                    let chosenSpecs = []
-                    updatedProjectInfo.chosenCustomSpecs.map(spec => chosenSpecs.push(spec))
-                    updatedProjectInfo.finalCustomSpecs.push({eqName: props.eqName, specs: chosenSpecs})
-                    updatedProjectInfo.chosenCustomSpecs.length = 0
-                    setAreCustomSpecsChosen(true)
+                let index = props.questionNum - 8
+                const indexOfDublicateCurrentSpec = updatedProjectInfo.chosenCustomSpecs.findIndex(spec => spec[0] === props.questionHeading)
+                if (updatedProjectInfo.finalCustomSpecs[index]){
+                    if (updatedProjectInfo.finalCustomSpecs[index].eqName !== updatedProjectInfo.equipmentSet[index]){
+                        updatedProjectInfo.finalCustomSpecs.splice(index, 1)
+                    } else {
+                        const indexOfDublicateSavedSpec = updatedProjectInfo.finalCustomSpecs[index].specs.findIndex(spec => spec[0] === props.questionHeading)
+                        if (indexOfDublicateSavedSpec !== -1) {
+                            updatedProjectInfo.finalCustomSpecs[index].specs.splice(indexOfDublicateSavedSpec, 1)
+                            updatedProjectInfo.finalCustomSpecs[index].specs.splice(indexOfDublicateSavedSpec, 0, [props.questionHeading, opt])
+                        }
+                    }
+
+                } else if (indexOfDublicateCurrentSpec !== -1) {
+                    updatedProjectInfo.chosenCustomSpecs.splice(indexOfDublicateCurrentSpec, 1) 
+                    updatedProjectInfo.chosenCustomSpecs.splice(indexOfDublicateCurrentSpec, 0, [props.questionHeading, opt]) 
+                } else if (indexOfDublicateCurrentSpec === -1 && !updatedProjectInfo.finalCustomSpecs[index]){
+                    updatedProjectInfo.chosenCustomSpecs.push([props.questionHeading, opt])
+                    if (updatedProjectInfo.chosenCustomSpecs.length === props.customSpecsNum) {
+                        let chosenSpecs = []
+                       updatedProjectInfo.chosenCustomSpecs.map(spec => chosenSpecs.push(spec))
+                       updatedProjectInfo.finalCustomSpecs.push({eqName: props.eqName, specs: chosenSpecs})
+                       updatedProjectInfo.chosenCustomSpecs.length = 0
+                       setAreCustomSpecsChosen(true)
+                    }
+
                 }
+
+                 
+                // if (props.visibleQuestions.findIndex(q => q > (7 + props.projectInfo.equipmentSet.length)) !== -1) {
+
+                // }
+               
+                // if (indexOfDublicate !== - 1){
+                //     updatedProjectInfo.chosenCustomSpecs.splice(indexOfDublicate, 1) 
+                // }   
+                // if (props.visibleQuestions.findIndex(q => q > 7 + props.projectInfo.equipmentSet.length)) {
+                //    updatedProjectInfo.finalCustomSpecs[index].specs.splice(indexOfDublicate, 1)
+                //    updatedProjectInfo.finalCustomSpecs[index].specs.splice(indexOfDublicate, 0, [props.questionHeading, opt])
+                // }
+                // else if (indexOfDublicate === -1)
+                // updatedProjectInfo.chosenCustomSpecs.push([props.questionHeading, opt])
+                
+                // if (updatedProjectInfo.chosenCustomSpecs.length === props.customSpecsNum) {
+                //     let chosenSpecs = []
+                //     updatedProjectInfo.chosenCustomSpecs.map(spec => chosenSpecs.push(spec))
+                //     updatedProjectInfo.finalCustomSpecs.push({eqName: props.eqName, specs: chosenSpecs})
+                //     updatedProjectInfo.chosenCustomSpecs.length = 0
+                //     setAreCustomSpecsChosen(true)
+                // }
                 props.setProjectInfo(updatedProjectInfo)
     }
 
@@ -60,7 +98,7 @@ const Question = (props) => {
             updateProjectInfo([], '', updatedMultipleChoice)
             return
         }
-        if (props.questionNum >= 8 && props.questionNum < 11) {
+        if (isCustomEqQuestion) {
             updateCustomChoiceStatus(choiceText)
         }
         setChosenOption(choiceText)
@@ -141,8 +179,9 @@ const Question = (props) => {
                 updatedProjectInfo.areaSizeToProtect = parseFloat(inputs[1])
             }
         } else if (props.questionNum === 1) {
-            if (updatedProjectInfo.serviceType.length > 0){
+            if (updatedProjectInfo.serviceType.length > 0) {
                 updatedProjectInfo.equipmentSet.length = 0
+                updatedProjectInfo.equipmentObjcts.length = 0
             }
             updatedProjectInfo.serviceType = currentChosenOption
         } else if (props.questionNum === 2 || props.questionNum === 7) {
@@ -152,7 +191,6 @@ const Question = (props) => {
             }
         } 
         props.setProjectInfo(updatedProjectInfo)
-        
     }
 
     const checkIfInputsAreFilled = (inputs, isInputCleared) => {
@@ -181,7 +219,7 @@ const Question = (props) => {
                 </QuestionLayoutOption>
                 <QuestionLayoutInput isAvailable={props.isQuestionAvailable}>
                     {renderQuestionInputs()}
-                    {(isCustomEqQuestion ? (props.questionNum >= 8 && props.questionNum < 11 && props.isButtonVisible) : isOptionChosen && (areInputsFilled || noInputsInQuestion()))
+                    {(isCustomEqQuestion ? (isCustomEqQuestion && props.isButtonVisible) : isOptionChosen && (areInputsFilled || noInputsInQuestion()))
                         ?
                     <AppButton
                         currentQuestion={props.currentQuestion}
@@ -200,7 +238,8 @@ const Question = (props) => {
                         currentQuestion={props.currentQuestion}
                         questionNum={props.questionNum}
                         onClickFunct={props.setCurrentQuestion}
-                        innerText={"EDIT"}/>
+                        innerText={"EDIT"}
+                        />
                 </QuestionAvailabilityView>
     )}
 

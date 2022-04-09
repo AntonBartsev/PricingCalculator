@@ -115,10 +115,12 @@ function App() {
   } 
 
   const countEquipmentPrice = (eqName) => {
+    // if (currentQuestion !== projectInfo.equipmentObjcts.length + 7) {return}
     const equipment = projectInfo.equipmentObjcts
+    const eqPrices = utils.equipmentPrices
     const currentEquipment = equipment.find(eq => eq.name === eqName)
     const equipmentInfo = utils.getEqSpecsChoice(eqName, projectInfo.areaSizeToProtect).specs
-    const basicEqPrice = eqName === "Cameras" ? 300 : (eqName === "Fire Alarms" ? 150 : 70) 
+    const basicEqPrice = eqName === "Cameras" ? eqPrices.camerasBasicPrice : (eqName === "Fire Alarms" ? eqPrices.fireAlarmsBasicPrice : eqPrices.doorLocksBasicPrice) 
     let eqPriceCoeff = 1.0
     if (eqName === "Cameras") {
       const indexOfResolution = equipmentInfo[0].findIndex(info => info.includes(currentEquipment.resolution))
@@ -137,7 +139,8 @@ function App() {
       } else if (indexOfStorageTime === 2) {
         eqPriceCoeff += 1.0
       }
-      return (basicEqPrice * eqPriceCoeff) * parseInt(currentEquipment.numOfCameras.match(/\d+/)[0])
+      const numOfEq = projectInfo.serviceType === "Custom" ? parseInt(currentEquipment.numOfCameras.match(/\d+/)[0]) : parseInt(currentEquipment.numOfCameras)
+      return (basicEqPrice * eqPriceCoeff) * numOfEq
     }
 
     if (eqName === "Fire Alarms") {
@@ -157,7 +160,9 @@ function App() {
       } else if (indexOfWarningType === 2) {
         eqPriceCoeff += 1.0
       }
-      return (basicEqPrice * eqPriceCoeff) * parseInt(currentEquipment.numOfAlarms.match(/\d+/)[0])
+      const numOfEq = projectInfo.serviceType === "Custom" ? parseInt(currentEquipment.numOfAlarms.match(/\d+/)[0]) : parseInt(currentEquipment.numOfAlarms)
+      console.log(eqPriceCoeff, basicEqPrice, numOfEq)
+      return (basicEqPrice * eqPriceCoeff) * numOfEq
     }
 
     if (eqName === "Door Locks") {
@@ -167,9 +172,9 @@ function App() {
       if (indexOfLockType === 1) {
         eqPriceCoeff += 1.0
       } 
-      if (indexOfSignalization  === 1) {
+      if (indexOfSignalization === 1) {
         eqPriceCoeff += 0.5
-      } else if (indexOfSignalization  === 2) {
+      } else if (indexOfSignalization === 2) {
         eqPriceCoeff += 1.0
       }
       if (indexOfUnlocking === 1) {
@@ -260,6 +265,7 @@ function App() {
       return <Question 
         key={name}
         currentQuestion={currentQuestion}
+        visibleQuestions={visibleQuestions}
         eqName={eqName}
         setCurrentQuestion={setCurrentQuestion}
         setNextQuestionVisible={updateVisibleQuestions}
@@ -328,7 +334,8 @@ function App() {
       if (projectInfo.serviceType === "Standard") {
         setEquipmentInfo(equipment, levelOfService, i)
       } else if (projectInfo.serviceType === "Custom") {
-        setCustomEqSpecs(equipment, i)
+        if (currentQuestion !== 8 + i) { return }
+        setCustomEqSpecs(equipment)
       }
     })
   }
@@ -337,24 +344,24 @@ function App() {
     const updatedProjectInfo = {...projectInfo}
     if (checkIfEqPresent(eqName, indx)) {updatedProjectInfo.equipmentObjcts.splice(indx, 1)}
     if (eqName === "Cameras" && currentQuestion === 8 + indx) {
+        updatedProjectInfo.equipmentObjcts.splice(indx, 1)
       const cameras = new Cameras(specs[0], specs[1], specs[2], specs[3])  
-      updatedProjectInfo.equipmentObjcts.splice(indx, 1)
       updatedProjectInfo.equipmentObjcts.splice(indx, 0, cameras) 
     } else if (eqName === "Fire Alarms" && currentQuestion === 8 + indx) {
-        const fireAlarms = new FireAlarms(specs[0], specs[1], specs[2], specs[3])   
         updatedProjectInfo.equipmentObjcts.splice(indx, 1)
+        const fireAlarms = new FireAlarms(specs[0], specs[1], specs[2], specs[3])   
         updatedProjectInfo.equipmentObjcts.splice(indx, 0, fireAlarms) 
     } else if (eqName === "Door Locks" && currentQuestion === 8 + indx) {
-        const doorLocks = new DoorLocks(specs[0], specs[1], specs[2])   
         updatedProjectInfo.equipmentObjcts.splice(indx, 1)
+        const doorLocks = new DoorLocks(specs[0], specs[1], specs[2])   
         updatedProjectInfo.equipmentObjcts.splice(indx, 0, doorLocks) 
     }
-
     setProjectInfo(updatedProjectInfo)
   }
 
-  const setCustomEqSpecs = (eqName, indx) => {
+  const setCustomEqSpecs = (eqName) => {
     let eqSpecsInfo = []
+    let indx = projectInfo.equipmentSet.indexOf(eqName)
     if (eqName === "Cameras") {
       eqSpecsInfo = projectInfo.equipmentCustomInfo.camCustomInfo
     } 
@@ -364,15 +371,13 @@ function App() {
     if (eqName === "Door Locks"){
         eqSpecsInfo = projectInfo.equipmentCustomInfo.doorLocksCustomInfo
     }
+    const finalSpecs = projectInfo.finalCustomSpecs.find(eq => eq.eqName === eqName)
     let specsInOrder = [] 
     if (projectInfo.finalCustomSpecs.length === 0) {return}
     eqSpecsInfo.specNames.map((name, i) => {
-      if (visibleQuestions[visibleQuestions.length - 1] !== 8 + indx) { return }
-      for (let spec of projectInfo.finalCustomSpecs[indx].specs) {
+      for (let spec of finalSpecs.specs) {
         if (spec[0] === name) {
-          specsInOrder.splice(i, 1)
           specsInOrder.splice(i, 0, spec[1])
-         
         }
       }
     })

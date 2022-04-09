@@ -1,15 +1,78 @@
 import { FieldContainer, HeadingMain,
     EquipmentInfoCard, EquipmentHeading, EquipmentInfoContainer, EquipmentInfoSubHeading, EquipmentInfoText, EquipmentInfoUnitContainer, PriceField } from "../Styles/ResultFieldStyle"
 import jsPDF from "jspdf"
+import AppButton from "./AppButton"
 
 const ResultField = (props) => {
 
-    
+const saveProjectInfoAsPDF = (pdfText) => {
+    const doc = new jsPDF()
+
+    doc.setFontSize(10)
+    doc.text(10, 25, pdfText)
+    doc.save('Your_Project.pdf')
+}
+
+    const getPdfText= () => {
+        let updatedPdfText = 
+        `                      Project Summary
+
+
+        ${props.countServicePrice(props.projectInfo.equipmentSet)}
+
+        Area Type: ${props.projectInfo.areaType} 
+
+        Area Size: 
+
+            Whole Area: ${props.projectInfo.wholeAreaSize}
+
+            To Protect: ${props.projectInfo.areaSizeToProtect}
+        
+        `
+        props.projectInfo.equipmentSet.map((eqName, i) => {
+            const obj = props.projectInfo.equipmentObjcts[i]
+            if (eqName === "Cameras") {
+                updatedPdfText = updatedPdfText.concat(
+                    `
+                    
+        ${obj.name}
+
+            Resolution: ${obj.resolution}
+            Cameras type: ${obj.type}
+            Storage time: ${obj.storageTime}
+            Number of cameras: ${obj.numOfCameras}`
+                )
+            } else if (eqName === "Fire Alarms"){
+                updatedPdfText = updatedPdfText.concat(
+                    `
+
+        ${obj.name}
+
+            Reaction Type: ${obj.reactionType}
+            Reaction Time: ${obj.reactionTime}
+            Warning Type: ${obj.warningType}
+            Number of alarm units: ${obj.numOfAlarms}`
+                )
+            } else if (eqName === "Door Locks") {
+                updatedPdfText = updatedPdfText.concat(
+                    `
+
+        ${obj.name}
+
+            Lock Type: ${obj.lockType}
+            Signilization: ${obj.signalization}
+            Unlocking Type: ${obj.unlockingType}
+                        `
+                )
+            }
+        })
+
+        return updatedPdfText
+    }
 
     const renderEqInfo = (eqName, obj) => {
         if (eqName === "Cameras") {
             return <div>
-                
                 <EquipmentHeading>{obj.name}</EquipmentHeading>
                 <EquipmentInfoContainer>
                     <EquipmentInfoUnitContainer>
@@ -30,6 +93,7 @@ const ResultField = (props) => {
                     </EquipmentInfoUnitContainer>
                 </EquipmentInfoContainer>
             </div>
+            
         } else if (eqName === "Fire Alarms") {
             return <div>
                 <EquipmentHeading>{obj.name}</EquipmentHeading>
@@ -37,10 +101,6 @@ const ResultField = (props) => {
                     <EquipmentInfoUnitContainer>
                         <EquipmentInfoSubHeading>Reaction Type: </EquipmentInfoSubHeading>
                         <EquipmentInfoText>{obj.reactionType}</EquipmentInfoText>
-                    </EquipmentInfoUnitContainer>
-                    <EquipmentInfoUnitContainer>
-                        <EquipmentInfoSubHeading>Reaction Time: </EquipmentInfoSubHeading>
-                        <EquipmentInfoText>{obj.reactionTime}</EquipmentInfoText>
                     </EquipmentInfoUnitContainer>
                     <EquipmentInfoUnitContainer>
                         <EquipmentInfoSubHeading>Reaction Time: </EquipmentInfoSubHeading>
@@ -101,6 +161,10 @@ const ResultField = (props) => {
             {props.projectInfo.equipmentSet.map((eq, i) => <EquipmentInfoCard key={i}>
                 {renderEqInfo(eq, props.projectInfo.equipmentObjcts[i])}
                 </EquipmentInfoCard>)}
+                <AppButton 
+                innerText={'DOWNLOAD PDF'} 
+                getPdfText={getPdfText}
+                onClickFunct={saveProjectInfoAsPDF}/>
         </FieldContainer>
     )
 }

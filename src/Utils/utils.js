@@ -1,20 +1,12 @@
 
 
 
-export const firstQuestionDescription = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque nisl eros, 
-    pulvinar facilisis justo mollis, auctor consequat urna. Morbi a bibendum metus. 
-    Donec scelerisque sollicitudin enim eu venenatis. Duis tincidunt laoreet ex, 
-    in pretium orci vestibulum eget. Class aptent taciti sociosqu ad litora torquent
-    per conubia nostra, per inceptos himenaeos.`
+export const firstQuestionDescription = `Choose a type of your area.`
   
-export const secondQuestionDescription = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque nisl eros, 
-    pulvinar facilisis justo mollis, auctor consequat urna. Morbi a bibendum metus. 
-    Donec scelerisque sollicitudin enim eu venenatis. Duis tincidunt laoreet ex, 
-    in pretium orci vestibulum eget.`
+export const secondQuestionDescription = `Choose service type of your project. Custom: you choose specifications of equipment;
+                                        Standard: just choose Low / Medium / High quality of equipment and we will set everything up for you!`
 
-export const thirdQuestionDescription = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque nisl eros, 
-    pulvinar facilisis justo mollis, auctor consequat urna. Morbi a bibendum metus.Duis tincidunt laoreet ex, 
-    in pretium orci vestibulum eget.`
+export const thirdQuestionDescription = `Choose equipment you want to be installed in your area.`
 
 export const setCamerasSpecs = (level, quantity) => {
     if (level === "Low") {
@@ -22,21 +14,21 @@ export const setCamerasSpecs = (level, quantity) => {
             res: '720x480', 
             type: 'Static', 
             storageTime: '24h',
-            quantity: Math.floor(quantity / 8) 
+            quantity: Math.ceil(quantity / 8) 
         }
     } else if (level === "Medium") {
         return { 
             res: '1280x720', 
             type: 'Moving', 
             storageTime: '7d',
-            quantity: Math.floor(quantity / 4) 
+            quantity: Math.ceil(quantity / 4) 
         }
     } else if (level === "High") {
         return { 
             res: '1920x1080', 
             type: 'Moving', 
             storageTime: '1m',
-            quantity: Math.floor(quantity / 2) 
+            quantity: Math.ceil(quantity / 2) 
         }
     }
 }
@@ -66,6 +58,11 @@ export const setFireAlarmsSpecs = (level, quantity) => {
     }
 }
 
+export const equipmentPrices = {
+    camerasBasicPrice: 300,
+    fireAlarmsBasicPrice: 150,
+    doorLocksBasicPrice: 75
+}
 
 export const setDoorLocksSpecs = (level) => {
     if (level === "Low") {
@@ -101,7 +98,7 @@ export const getEqSpecsChoice = (eqName, quantity) => {
                 [`Low ${camLSpecs.res}`, `Medium ${camMSpecs.res}`, `High ${camHSpecs.res}`], 
                 [`Static`, `Moving`],
                 [`24h`, `7d`, `1m`],
-                [`Low ${camLSpecs.quantity}`, `Medium ${camMSpecs.quantity}`, `High ${camHSpecs.quantity}`]
+                [`Low: ${camLSpecs.quantity}`, `Medium: ${camMSpecs.quantity}`, `High: ${camHSpecs.quantity}`]
             ]
         }
     } 
@@ -116,7 +113,7 @@ export const getEqSpecsChoice = (eqName, quantity) => {
                 [`${faLSpecs.reactionType}`, `${faMSpecs.reactionType}`], 
                 [`1min`, `30s`, `10s`],
                 [`${faLSpecs.warningType}`, `${faMSpecs.warningType}`, `${faHSpecs.warningType}`],
-                [`Low ${faLSpecs.quantity}`, `Medium ${faMSpecs.quantity}`, `High ${faHSpecs.quantity}`]
+                [`Low: ${faLSpecs.quantity}`, `Medium: ${faMSpecs.quantity}`, `High: ${faHSpecs.quantity}`]
             ]
         }
     } else if (eqName === "Door Locks") {

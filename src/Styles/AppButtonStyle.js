@@ -3,7 +3,8 @@ import styled from "styled-components";
 
 export const AppButtonStyle = styled.div`
     position: ${props => props.isEditButton ? 'absolute' : ''};
-    width: ${props => props.isLargerBtn ? '120px' : '80px'};
+    width: ${props => props.isLargerBtn ? '160px' : '80px'};
+    margin-top: ${props => props.isLargerBtn ? '30px' : ''};
     height: 40px;
     background-color: ${props => props.isEditButton ? 'red' : '#3898EC'};
     text-align: center;

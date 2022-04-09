@@ -3,7 +3,7 @@ import { AppButtonStyle } from "../Styles/AppButtonStyle";
 const AppButton = (props) => {
 
     const setBtnOnClickArg = () => {
-        if (props.innerText === "NEXT" || props.innerText === "SEE RESULT") {
+        if (props.innerText === "NEXT") {
             if (props.questionNum === 1 && props.chosenOption === "Custom") {
                 return [props.questionNum + 6]
             }
@@ -14,13 +14,16 @@ const AppButton = (props) => {
         } else if (props.innerText === "EDIT") {
              return [props.questionNum]
         }
+        else if (props.innerText === "DOWNLOAD PDF"){
+            return [props.getPdfText()]
+        }
 
     }
     
     
     return (
         <AppButtonStyle
-        isLargerBtn={props.innerText === "SEE RESULT"}
+        isLargerBtn={props.innerText === "DOWNLOAD PDF"}
         isVisible={props.currentQuestion !== props.questionNum}
         isEditButton={props.innerText === "EDIT"}
         onClick={() => props.onClickFunct(setBtnOnClickArg()[0], setBtnOnClickArg()[1])}>
