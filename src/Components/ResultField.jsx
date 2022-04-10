@@ -1,18 +1,17 @@
-import { FieldContainer, HeadingMain,
-    EquipmentInfoCard, EquipmentHeading, EquipmentInfoContainer, EquipmentInfoSubHeading, EquipmentInfoText, EquipmentInfoUnitContainer, PriceField } from "../Styles/ResultFieldStyle"
+import { FieldContainer, HeadingMain, EquipmentInfoCard, EquipmentHeading, EquipmentInfoContainer, EquipmentInfoSubHeading, EquipmentInfoText, EquipmentInfoUnitContainer, PriceField } from "../Styles/ResultFieldStyle"
 import jsPDF from "jspdf"
 import AppButton from "./AppButton"
-
+// Result field of the project 
 const ResultField = (props) => {
 
 const saveProjectInfoAsPDF = (pdfText) => {
     const doc = new jsPDF()
-
     doc.setFontSize(10)
     doc.text(10, 25, pdfText)
-    doc.save('Your_Project.pdf')
+    doc.save('Your_Project_Summary.pdf')
 }
 
+// set PDF text from project information
     const getPdfText= () => {
         let updatedPdfText = 
         `                      Project Summary
@@ -70,6 +69,7 @@ const saveProjectInfoAsPDF = (pdfText) => {
         return updatedPdfText
     }
 
+    // Render equipment information
     const renderEqInfo = (eqName, obj) => {
         if (eqName === "Cameras") {
             return <div>

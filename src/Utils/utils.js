@@ -1,6 +1,6 @@
 
 
-
+// Questions descriptions
 export const firstQuestionDescription = `Choose a type of your area.`
   
 export const secondQuestionDescription = `Choose service type of your project. Custom: you choose specifications of equipment;
@@ -8,6 +8,7 @@ export const secondQuestionDescription = `Choose service type of your project. C
 
 export const thirdQuestionDescription = `Choose equipment you want to be installed in your area.`
 
+// Set specifications of equipment in the standard service choice
 export const setCamerasSpecs = (level, quantity) => {
     if (level === "Low") {
         return { 
@@ -58,12 +59,6 @@ export const setFireAlarmsSpecs = (level, quantity) => {
     }
 }
 
-export const equipmentPrices = {
-    camerasBasicPrice: 300,
-    fireAlarmsBasicPrice: 150,
-    doorLocksBasicPrice: 75
-}
-
 export const setDoorLocksSpecs = (level) => {
     if (level === "Low") {
         return { 
@@ -86,6 +81,15 @@ export const setDoorLocksSpecs = (level) => {
     }
 }
 
+// Equipment prices 
+export const equipmentPrices = {
+    camerasBasicPrice: 300,
+    fireAlarmsBasicPrice: 150,
+    doorLocksBasicPrice: 75
+}
+
+
+// Custom equipment specifications 
 export const getEqSpecsChoice = (eqName, quantity) => {
     if (eqName === "Cameras") {
         const camLSpecs = setCamerasSpecs("Low", quantity)

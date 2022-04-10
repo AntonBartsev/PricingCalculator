@@ -5,6 +5,8 @@ import Question from './Components/Question';
 import ResultField from './Components/ResultField';
 import { QuestionHeading } from './Styles/QuestionsStyle';
 
+
+// Empty project information object 
   const stockProjectInfo = {
     areaType: "",
     wholeAreaSize: 0,
@@ -21,6 +23,7 @@ import { QuestionHeading } from './Styles/QuestionsStyle';
     finalCustomSpecs: []
   }
 
+  // Equipment classes
   class Cameras {
     name = "Cameras"
     constructor (resolution, type, storageTime, numOfCameras){
@@ -28,15 +31,6 @@ import { QuestionHeading } from './Styles/QuestionsStyle';
       this.type = type
       this.storageTime = storageTime
       this.numOfCameras = numOfCameras
-    }
-
-    renderInfo = () => {
-      return `${this.name}:
-                Resolution: ${this.resolution};
-                Cameras type: ${this.type};
-                Storage time: ${this.storageTime};
-                Number of cameras: ${this.numOfCameras};
-              `
     }
   }
 
@@ -48,15 +42,6 @@ import { QuestionHeading } from './Styles/QuestionsStyle';
       this.warningType = warningType
       this.numOfAlarms = numOfAlarms
     }
-
-    renderInfo = () => {
-      return `${this.name}:
-                Reaction Type: ${this.reactionType};
-                Reaction Time: ${this.reactionTime};
-                Warning Type: ${this.warningType};
-                Number of alarm units: ${this.numOfAlarms};
-              `
-    }
   }
 
   class DoorLocks {
@@ -66,31 +51,28 @@ import { QuestionHeading } from './Styles/QuestionsStyle';
       this.signalization = signalization
       this.unlockingType = unlockingType
     }
-
-    renderInfo = () => {
-      return `${this.name}:
-                Lock Type: ${this.lockType};
-                Signilization: ${this.signalization};
-                Unlocking Type: ${this.unlockingType};
-              `
-    }
   }
 
+
 function App() {
+  // Array of visible quesions - holds numbers of questions that should be present on the page
   const [visibleQuestions, setVisibleQuestions] = useState([0])
+  // Project information object
   const [projectInfo, setProjectInfo] = useState(stockProjectInfo)
+  // Current question - currently chosen question to operate with
   const [currentQuestion, setCurrentQuestion] = useState(0)
 
   const updateVisibleQuestions = (newVisibleQuestion, chosenEqLevel) => {
     const updatedVisibleQuestions = [...visibleQuestions]
-    
+    // If equipment specifications are to be chosen
     if ((chosenEqLevel && currentQuestion >= 3 && currentQuestion < 6) || (currentQuestion >= 8 && currentQuestion < 11)) {
       setFinalProjectEquipment(chosenEqLevel)
     } 
-
+    // If no equipment specifications chosen yet, delete all questions with equipment specifications from page when editing equipment choice
     if ((currentQuestion === 2 || currentQuestion === 7) && projectInfo.equipmentObjcts.length > 0) {
       updatedVisibleQuestions.splice(3, 3)
     }
+    // If next Question is already present, just make it current
     if (updatedVisibleQuestions.findIndex(q => q === newVisibleQuestion) !== -1){
       setCurrentQuestion(visibleQuestions[visibleQuestions.length - 1])
       return 
@@ -100,6 +82,7 @@ function App() {
     setVisibleQuestions(updatedVisibleQuestions)
   }
 
+// Set area price for the project
   const countAreaPrice = () => {
     const areaPercentage = (projectInfo.areaSizeToProtect / projectInfo.areaSizeToProtect) * 100
     let areaPriceCoeff  = 1.5
@@ -114,14 +97,15 @@ function App() {
     return (areaTypePrice * areaPriceCoeff)
   } 
 
+  // Set equipment price for the project 
   const countEquipmentPrice = (eqName) => {
-    // if (currentQuestion !== projectInfo.equipmentObjcts.length + 7) {return}
     const equipment = projectInfo.equipmentObjcts
     const eqPrices = utils.equipmentPrices
     const currentEquipment = equipment.find(eq => eq.name === eqName)
     const equipmentInfo = utils.getEqSpecsChoice(eqName, projectInfo.areaSizeToProtect).specs
     const basicEqPrice = eqName === "Cameras" ? eqPrices.camerasBasicPrice : (eqName === "Fire Alarms" ? eqPrices.fireAlarmsBasicPrice : eqPrices.doorLocksBasicPrice) 
     let eqPriceCoeff = 1.0
+    // Depending on the index of specification in the list of specifications, increase basic price of the equipment
     if (eqName === "Cameras") {
       const indexOfResolution = equipmentInfo[0].findIndex(info => info.includes(currentEquipment.resolution))
       const indexOfType = equipmentInfo[1].findIndex(info => info.includes(currentEquipment.type))
@@ -139,6 +123,7 @@ function App() {
       } else if (indexOfStorageTime === 2) {
         eqPriceCoeff += 1.0
       }
+      // Get number of equipment as integer
       const numOfEq = projectInfo.serviceType === "Custom" ? parseInt(currentEquipment.numOfCameras.match(/\d+/)[0]) : parseInt(currentEquipment.numOfCameras)
       return (basicEqPrice * eqPriceCoeff) * numOfEq
     }
@@ -184,6 +169,7 @@ function App() {
     }
   }
 
+  // Get final price of the project
   const countServicePrice = (eqNames) => {
     const equipmentPrices = []
     eqNames.map(name => equipmentPrices.push(countEquipmentPrice(name)))
@@ -195,9 +181,10 @@ function App() {
     return `Total Price: $${areaPrice + eqPrice}`
   }
 
+
+  // Render second question (question number = 1)
   const renderSecondQ = () => {
     if (visibleQuestions.findIndex(q => q === 1) === -1) { return }
-
    return <Question 
       currentQuestion={currentQuestion}
       setCurrentQuestion={setCurrentQuestion}
@@ -214,7 +201,7 @@ function App() {
     />
   }
 
-
+  // Render third question - equipment choice 
   const renderThirdQ = () => {
     if (visibleQuestions.findIndex(q => q === 2 || q === 7) === -1) { return }
    return <Question 
@@ -235,6 +222,7 @@ function App() {
     />
   }
 
+  // Render equipment specifications question for standard service
   const renderEquipmentQs = () => {
       if (projectInfo.equipmentSet.length === 0 || projectInfo.serviceType === "Custom") { return }
     return projectInfo.equipmentSet.map((eq, i) => {
@@ -257,6 +245,7 @@ function App() {
     })
   }
 
+  // Render equipment specifications questions for custom service
   const renderEqSpecs = (eqSpecNames, specs, qNum, eqName) => {
     if (visibleQuestions.findIndex(q => q === qNum ) === -1) { return }
     const areAllSpecsChosen =  projectInfo.finalCustomSpecs.findIndex(eq => eq.eqName === eqName) !== -1
@@ -283,7 +272,8 @@ function App() {
     })
   }
 
-  const updateEquipmentCustomInfo = (eqSet) => {
+  // Set all equipment information to the project information 
+    const updateEquipmentCustomInfo = (eqSet) => {
     if (eqSet.length === 0 || projectInfo.serviceType === "Standard"){ return }
     const updatedProjectInfo = {...projectInfo}
     return eqSet.map(eq => {
@@ -298,6 +288,7 @@ function App() {
   })
 }
 
+  // Set equipment specifications as equipment objects properties in standard sevice mode
   const setEquipmentInfo = (equipment, levelOfService, indexOfEqInOrder) => {
     const updatedProjectInfo = {...projectInfo} 
     if (checkIfEqPresent(equipment, indexOfEqInOrder)) {updatedProjectInfo.equipmentObjcts.splice(indexOfEqInOrder, 1)}
@@ -323,11 +314,12 @@ function App() {
     return
   }
 
+  // True if equipment was already chosen
   const checkIfEqPresent = (equipmnentName, index) => {
     return projectInfo.equipmentObjcts.findIndex((eq, i) => eq.name === equipmnentName && i !== index) !== -1
   }
 
-
+  // Decide on which function to use when creating equipment objects depending on type of service chosen
   const setFinalProjectEquipment = (levelOfService) => {
     if (projectInfo.equipmentSet.length === 0) { return [{}]}
     projectInfo.equipmentSet.map((equipment, i) => {
@@ -340,6 +332,7 @@ function App() {
     })
   }
 
+  // Set equipment specifications as equipment objects properties in custom sevice mode
   const setCustomEquipmentInfo = (specs, eqName, indx) => {
     const updatedProjectInfo = {...projectInfo}
     if (checkIfEqPresent(eqName, indx)) {updatedProjectInfo.equipmentObjcts.splice(indx, 1)}
@@ -359,6 +352,7 @@ function App() {
     setProjectInfo(updatedProjectInfo)
   }
 
+  // Set custom chosen specs of equipment in order to create objects with setCustomEquipmentInfo function
   const setCustomEqSpecs = (eqName) => {
     let eqSpecsInfo = []
     let indx = projectInfo.equipmentSet.indexOf(eqName)
@@ -366,10 +360,10 @@ function App() {
       eqSpecsInfo = projectInfo.equipmentCustomInfo.camCustomInfo
     } 
     if (eqName === "Fire Alarms") {
-        eqSpecsInfo = projectInfo.equipmentCustomInfo.fireAlarmsCustomInfo
+      eqSpecsInfo = projectInfo.equipmentCustomInfo.fireAlarmsCustomInfo
     } 
     if (eqName === "Door Locks"){
-        eqSpecsInfo = projectInfo.equipmentCustomInfo.doorLocksCustomInfo
+      eqSpecsInfo = projectInfo.equipmentCustomInfo.doorLocksCustomInfo
     }
     const finalSpecs = projectInfo.finalCustomSpecs.find(eq => eq.eqName === eqName)
     let specsInOrder = [] 
@@ -384,6 +378,7 @@ function App() {
     setCustomEquipmentInfo(specsInOrder, eqName, indx)
   }
 
+  // Render result field with information
   const renderResultField = () => {
     if (visibleQuestions[visibleQuestions.length - 1] !== projectInfo.equipmentSet.length + 3
       && visibleQuestions[visibleQuestions.length - 1] !== projectInfo.equipmentSet.length + 8) { return } 
